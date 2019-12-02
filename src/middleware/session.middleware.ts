@@ -1,10 +1,10 @@
 import session from 'express-session';
 
-const sessionconfig = {
+const sess = {
     secret: 'secret',
     cookie: {secure: false},
     resave: false,
     saveUninitialized: false
 };
 
-export const sessionMiddleware = session(sessionconfig);
+export const sessionMiddleware = session(sess);

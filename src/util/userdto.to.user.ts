@@ -2,8 +2,7 @@ import { UserDTO } from '../dtos/user.dto';
 import { User } from '../models/user';
 import { Role } from '../models/role';
 
-// Takes array of userDTOs, loop through, and grabs role name and id
-// then build a new user object and passes in all the values
+// Turn userDTO into an user object
 export function userDTOtoUser(uD: UserDTO[]): User {
     const role = new Role(uD[0].role_id, uD[0].role_name);
     return new User(

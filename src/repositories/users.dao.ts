@@ -8,7 +8,7 @@ export async function daoFindUsers(): Promise<User[]> {
 
     try {
         client = await connectionPool.connect();
-        const result = await client.query('SELECT * FROM ers_users natural join user_role_id natural join user_roles');
+        const result = await client.query('SELECT * FROM ers.users natural join ers.user_roles');
         return multiUserDTOConverter(result.rows);
     } catch (e) {
         throw {
@@ -20,14 +20,13 @@ export async function daoFindUsers(): Promise<User[]> {
     }
 }
 
-
+// Check the input username and password
 export async function daoGetUserByUsernameAndPassword(username: string, password: string): Promise<User> {
     let client: PoolClient;
 
     try {
         client = await connectionPool.connect();
-        const result = await client.query('SELECT * FROM ers_users natural join ers_user_roles natural join user_role_id WHERE username = $1 and password = $2',
-            [username, password]);
+        const result = await client.query('SELECT * FROM ers.users natural join ers.user_roles WHERE username = $1 and password = $2', [username, password]);
         if (result.rowCount === 0) {
             throw 'Invalid Credentials';
         } else {
@@ -50,12 +49,17 @@ export async function daoGetUserByUsernameAndPassword(username: string, password
     }
 }
 
-// Gets the garden by id from database
+
+
+
+
+
+// Get user by id from database
 export async function daoGetUserById(id: number): Promise<User> {
     let client: PoolClient;
     try {
         client = await connectionPool.connect();
-        const result = await client.query('SELECT * FROM ers_users natural join user_role_id natural join ers_user_roles where ers_user_role_id = $1', [id]);
+        const result = await client.query('SELECT * FROM ers.users INNER JOIN ers.user_roles ON users.user_id = user_roles.role_id where user_id = $1', [id]);
         if (result.rowCount > 0) {
             return userDTOtoUser(result.rows);
         } else {
@@ -78,29 +82,31 @@ export async function daoGetUserById(id: number): Promise<User> {
     }
 }
 
-// saves the updated user to database
-export async function daoUpdateUser(user: User): Promise<User> {
+
+
+
+// save updated user to database
+export async function daoUpdateUser(id: number, u: User): Promise<User> {
     let client: PoolClient;
     client = await connectionPool.connect();
     try {
-        await client.query('BEGIN');
-        await client.query('update ers_users set ers_username = $1, ers_password = $2, user_first_name = $3, user_last_name = $4, user_email = $5 where user_role_id = $6',
-        [user.username, user.password, user.firstName, user.lastName, user.email, user.userId]);
-        await client.query('update ers_user_roles set ers_user_role_id = $1 where ers_user_role_id = $2',
-        [user.role.roleId, user.userId]);
-        await client.query('COMMIT');
-        const result = await client.query('SELECT * FROM ers_users natural join ers_user_roles natural join ers_user_role_id where ers_user_role_id = $1',
-        [user.userId]);
-        if (result.rowCount > 0) {
-            return userDTOtoUser(result.rows);
-        } else {
-            throw 'No Such User';
+        const temp = await client.query(`SELECT * FROM ers.users WHERE user_id = $1;`, [id]);
+        const tempUser = userDTOtoUser(temp.rows);
+        for (const key in u) {
+            if (u[key] === undefined) {
+                u[key] = tempUser[key];
+            }
         }
+        await client.query(`update ers.users SET user_id = $1, username = $2,
+        "password" = $3, first_name = $4, last_name = $5, email = $6 WHERE user_id = $7`,
+        [u.userId, u.username, u.password, u.firstName, u.lastName, u.email, id]);
+        return u;
     } catch (e) {
-        await client.query('ROLLBACK');
+        console.log(e);
+
         throw {
             status: 500,
-            message: 'Internal Server Error'
+            message: `Internal Server Error`
         };
     } finally {
         client && client.release();

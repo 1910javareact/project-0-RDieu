@@ -20,20 +20,19 @@ app.use('/users', usersRouter);
 
 app.use('/reimbursements', reimbursementsRouter);
 
-// Login credentails
+// Login credential
 app.post('/login', async (req, res) => {
-    const {username, password} = req.body;
+    const { username, password } = req.body;
     if (!username || !password) {
-        res.status(400).send('Please have a username and password field');
-        return;
-    }
-
-    try {
-        const user = await getUserByUsernameAndPassword(username, password);
-        req.session.user = user;
-        res.json(user);
-    } catch (e) {
-        res.status(e.status).send(e.message);
+        res.status(400).send('please have a username and password field');
+    } else {
+        try {
+            const user = await getUserByUsernameAndPassword(username, password);
+            req.session.user = user;
+            res.json(user);
+        } catch (e) {
+            res.status(e.status).send(e.message);
+        }
     }
 });
 

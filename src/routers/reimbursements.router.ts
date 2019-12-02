@@ -6,7 +6,7 @@ import { Reimbursement } from '../models/reimbursement';
 export const reimbursementsRouter = express.Router();
 
 
-// endpoint
+// Endpoint to find reimbursements by status
 reimbursementsRouter.get('/status/:statusId', [authorization(['finance-manager'])],
     async (req, res) => {
         const id = +req.params.statusId;
@@ -23,7 +23,7 @@ reimbursementsRouter.get('/status/:statusId', [authorization(['finance-manager']
     });
 
 
-// endpoint
+// Endpoint to find reimbursements by user
 reimbursementsRouter.get('/author/userId/:userId', [authorization(['finance-manager', 'admin', 'user'])],
     async (req, res) => {
         const id = +req.params.userId;
@@ -51,7 +51,7 @@ reimbursementsRouter.get('/author/userId/:userId', [authorization(['finance-mana
     });
 
 
-// endpoint
+// Endpoint to submit reimbursement
 reimbursementsRouter.post('', [authorization(['finance-manager', 'admin', 'user'])],
     async (req, res) => {
         const { body } = req;
@@ -62,6 +62,7 @@ reimbursementsRouter.post('', [authorization(['finance-manager', 'admin', 'user'
                 if (body[key] === undefined) {
                     res.status(400).send('Please include all fields');
                     error = true;
+
                     break;
                 } else {
                     newR[key] = body[key];
@@ -78,17 +79,26 @@ reimbursementsRouter.post('', [authorization(['finance-manager', 'admin', 'user'
     });
 
 
-// endpoint
-reimbursementsRouter.patch('', [authorization(['finance-manager'])],
-async (req, res) => {
+// Endpoint to update reimbursement
+reimbursementsRouter.patch('', [authorization(['Admin', 'Finance-manager']), async (req, res) => {
+    const { body } = req;
+
+    const reimbursement = new Reimbursement(0, 0, 0 , 0, 0, ``, 0, 0, 0);
+    for (const key in reimbursement) {
+        if (body[key] === undefined) {
+            reimbursement[key] = undefined;
+        } else {
+            reimbursement[key] = body[key];
+        }
+    }
+    const id = reimbursement.reimbursementId;
+    if (isNaN(id)) {
+        res.status(400).send(`Please enter a valid reimbursement id`);
+    }
     try {
-        const { body } = req;
-        const newR = new Reimbursement(0, 0, 0, 0, 0, '', 0, 0, 0);
-        newR.reimbursementId = body.reimbursementId;
-        newR.status = body.status;
-        const update = await updateReimbursement(newR);
-        res.status(200).json(update);
+        const result = await updateReimbursement(id, reimbursement);
+        res.status(201).json(result);
     } catch (e) {
         res.status(e.status).send(e.message);
     }
-});
+}]);

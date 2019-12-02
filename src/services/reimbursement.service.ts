@@ -1,35 +1,36 @@
 import { daoGetReimbursementByStatusId, daoGetReimbursementByUserId, daoSaveOneReimbursement, daoUpdateReimbursement } from '../repositories/reimbursement.dao';
 import { Reimbursement } from '../models/reimbursement';
 
-// retrieve reimbursement from the doa
-export async function getReimbursementByStatusId(id: number): Promise<Reimbursement[]> {
+// retrieve reimbursement from doa
+export function getReimbursementByStatusId(id: number): Promise<Reimbursement[]> {
     try {
-        return await daoGetReimbursementByStatusId(id);
+        return daoGetReimbursementByStatusId(id);
     } catch (e) {
         throw e;
     }
 }
 
-
-export async function getReimbursementByUserId(id: number): Promise<Reimbursement[]> {
+// get reimbursement from doa
+export function getReimbursementByUserId(userId: number): Promise<Reimbursement[]> {
     try {
-        return await daoGetReimbursementByUserId(id);
+        return daoGetReimbursementByUserId(userId);
     } catch (e) {
         throw e;
     }
 }
 
-export async function saveOneReimbursement(reimbursement: Reimbursement): Promise<Reimbursement> {
+// send reimbursement to doa
+export function saveOneReimbursement(reimbursement: Reimbursement): Promise<Reimbursement> {
     try {
-        return await daoSaveOneReimbursement(reimbursement);
+        return daoSaveOneReimbursement(reimbursement);
     } catch (e) {
         throw e;
     }
 }
-
-export async function updateReimbursement(reimbursement: Reimbursement): Promise<Reimbursement> {
+// update reimbursement
+export async function updateReimbursement(id: number, reimbursement: Reimbursement): Promise<Reimbursement> {
     try {
-        return await daoUpdateReimbursement(reimbursement);
+        return await daoUpdateReimbursement(id, reimbursement);
     } catch (e) {
         throw e;
     }

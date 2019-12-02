@@ -3,38 +3,32 @@ import { User } from '../models/user';
 import { daoFindUsers, daoGetUserByUsernameAndPassword, daoGetUserById, daoUpdateUser } from '../repositories/users.dao';
 
 // process requests
-export async function getAllUsers(): Promise<User[]> {
+export function getAllUsers(): Promise<User[]> {
     try {
-        return await daoFindUsers();
+        return daoFindUsers();
     } catch (e) {
         throw e;
     }
 }
 
-// request username and password from the dao
-export async function getUserByUsernameAndPassword(username: string, password: string): Promise<User> {
+// request username and password
+export function getUserByUsernameAndPassword(username: string, password: string): Promise<User> {
     try {
-        return await daoGetUserByUsernameAndPassword(username, password);
+        return daoGetUserByUsernameAndPassword(username, password);
     } catch (e) {
         throw e;
     }
 }
 
 // retrieve user Id
-export async function getUserById(id: number): Promise<User> {
-    return await daoGetUserById(id);
+export function getUserById(id: number): Promise<User> {
+    return daoGetUserById(id);
 }
 
 // Update user
-export async function updateUser(user: User): Promise<User> {
+export async function updateUser(id: number, user: User): Promise<User> {
     try {
-        const dUser = await daoGetUserById(user.userId);
-        for (const u in user) {
-            if (user[u] !== dUser.hasOwnProperty(u)) {
-                dUser[u] = user[u];
-            }
-        }
-        return daoUpdateUser(dUser);
+        return await daoUpdateUser(id, user);
     } catch (e) {
         throw e;
     }
