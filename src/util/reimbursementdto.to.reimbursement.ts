@@ -12,8 +12,8 @@ export function reimbursementDTOtoreimbursement(rD: ReimbursementDTO[]): Reimbur
         rD[0].date_resolved,
         rD[0].description,
         rD[0].resolver,
-        rD[0].status,
-        rD[0].type
+        rD[0].status_id,
+        rD[0].type_id
     );
 }
 
